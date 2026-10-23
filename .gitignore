@@ -1,0 +1,11 @@
+bin/
+obj/
+.vs/
+*.user
+*.suo
+runtime/
+artifacts/
+*.binlog
+.idea/
+/Notes/
+/Mcp/БЫСТРЫЙ СТАРТ ЭЛЕКТРИКА*.md

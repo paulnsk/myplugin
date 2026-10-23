@@ -1,0 +1,30 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyPlugin", "MyPlugin.csproj", "{91F2CC22-6F38-479B-8C7A-3281E72613B2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyPlugin.Electrica", "Electrica\MyPlugin.Electrica.csproj", "{C935BC1D-F063-4D92-A778-A51487811C34}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyPlugin.Tests", "Tests\MyPlugin.Tests.csproj", "{3725CF74-19E9-46E2-922C-EBDFFAA74F86}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3725CF74-19E9-46E2-922C-EBDFFAA74F86}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3725CF74-19E9-46E2-922C-EBDFFAA74F86}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3725CF74-19E9-46E2-922C-EBDFFAA74F86}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3725CF74-19E9-46E2-922C-EBDFFAA74F86}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C935BC1D-F063-4D92-A778-A51487811C34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C935BC1D-F063-4D92-A778-A51487811C34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C935BC1D-F063-4D92-A778-A51487811C34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C935BC1D-F063-4D92-A778-A51487811C34}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91F2CC22-6F38-479B-8C7A-3281E72613B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91F2CC22-6F38-479B-8C7A-3281E72613B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91F2CC22-6F38-479B-8C7A-3281E72613B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91F2CC22-6F38-479B-8C7A-3281E72613B2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

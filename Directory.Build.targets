@@ -1,0 +1,32 @@
+<Project>
+  <!-- Счётчик принадлежит основному проекту; модуль читает его после сборки ProjectReference. -->
+  <Target Name="SetPluginBuildVersion" BeforeTargets="GetAssemblyVersion"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(MSBuildProjectName)' != 'MyPlugin.Tests'">
+    <PropertyGroup>
+      <PluginVersionFile>$(MSBuildThisFileDirectory)Version.props</PluginVersionFile>
+    </PropertyGroup>
+    <XmlPeek XmlInputPath="$(PluginVersionFile)" Query="/Project/PropertyGroup/PluginMajor/text()">
+      <Output TaskParameter="Result" PropertyName="PluginMajor" />
+    </XmlPeek>
+    <XmlPeek XmlInputPath="$(PluginVersionFile)" Query="/Project/PropertyGroup/PluginMinor/text()">
+      <Output TaskParameter="Result" PropertyName="PluginMinor" />
+    </XmlPeek>
+    <XmlPeek XmlInputPath="$(PluginVersionFile)" Query="/Project/PropertyGroup/PluginBuild/text()">
+      <Output TaskParameter="Result" PropertyName="PluginBuild" />
+    </XmlPeek>
+    <PropertyGroup>
+      <PluginBuild Condition="'$(MSBuildProjectName)' == 'MyPlugin'">$([MSBuild]::Add($(PluginBuild), 1))</PluginBuild>
+      <Version>$(PluginMajor).$(PluginMinor).$(PluginBuild)</Version>
+      <AssemblyVersion>$(PluginMajor).$(PluginMinor).0.0</AssemblyVersion>
+      <FileVersion>$(Version).0</FileVersion>
+      <InformationalVersion>$(Version)</InformationalVersion>
+    </PropertyGroup>
+    <WriteLinesToFile Condition="'$(MSBuildProjectName)' == 'MyPlugin'"
+                      File="$(PluginVersionFile)" Overwrite="true" Encoding="UTF-8"
+                      Lines="&lt;Project&gt;;&lt;PropertyGroup&gt;;&lt;PluginMajor&gt;$(PluginMajor)&lt;/PluginMajor&gt;;&lt;PluginMinor&gt;$(PluginMinor)&lt;/PluginMinor&gt;;&lt;PluginBuild&gt;$(PluginBuild)&lt;/PluginBuild&gt;;&lt;/PropertyGroup&gt;;&lt;/Project&gt;" />
+  </Target>
+  <Target Name="UpdateLatestPlugin" AfterTargets="Build"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(MSBuildProjectName)' == 'MyPlugin.Electrica'">
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)Update-Latest.ps1&quot; -BuildDirectory &quot;$(TargetDir).&quot;" />
+  </Target>
+</Project>

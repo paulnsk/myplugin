@@ -1,0 +1,22 @@
+<Project>
+  <Import Project="$(MSBuildThisFileDirectory)Version.props" />
+  <PropertyGroup>
+    <Version>$(PluginMajor).$(PluginMinor).$(PluginBuild)</Version>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <BimDirectory Condition="'$(BimDirectory)' == ''">D:\ProjectStudioClassic\ProjectStudio\Compile</BimDirectory>
+    <NanoCadDirectory Condition="'$(NanoCadDirectory)' == ''">C:\Program Files\Nanosoft\nanoCAD x64 26.0</NanoCadDirectory>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(MSBuildProjectName)' != 'MyPlugin.Tests'">
+    <Reference Include="Nanosoft.Controls.UI">
+      <HintPath>$(BimDirectory)\Nanosoft.Controls.UI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(MSBuildProjectName)' != 'MyPlugin.Tests'">
+    <BimReference Include="Nanosoft.Platform;Nanosoft.Platform.UI;Nanosoft.Utils;Nanosoft.Kit;Nanosoft.Cad.Model;Nanosoft.Cad.Toolware;Nanosoft.CAE.Model;Nanosoft.CAE.Project;Nanosoft.CAE.Db;Nanosoft.Studio.Core;Nanosoft.Studio.Model;Nanosoft.Studio.Kit;Nanosoft.Studio.DataBase;Nanosoft.Studio.DataBase.Model;Nanosoft.Graphic;Nanosoft.Graphic.Db;Nanosoft.CadInterop;Nanosoft.Common.Guard;Nanosoft.Common.Extensions;Nanosoft.Common.Collections;Nanosoft.Common.Collections.WriteProtected;Evos.Api.Model;Newtonsoft.Json" />
+    <Reference Include="@(BimReference)">
+      <HintPath>$(BimDirectory)\%(Identity).dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <PlatformTarget>x64</PlatformTarget>
+    <ElectricaDirectory Condition="'$(ElectricaDirectory)' == ''">$(BimDirectory)\ProjectStudio\Electrica.Calc\AnyCPU\Debug\net6.0-windows</ElectricaDirectory>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MyPlugin.csproj" />
+    <Reference Include="Nanosoft.ObjectLib.ESN.Db">
+      <HintPath>$(ElectricaDirectory)\Nanosoft.ObjectLib.ESN.Db.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Nanosoft.ObjectLib.Core">
+      <HintPath>$(BimDirectory)\Nanosoft.ObjectLib.Core.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Nanosoft.ObjectLib.WireCommon">
+      <HintPath>$(BimDirectory)\Nanosoft.ObjectLib.WireCommon.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Nanosoft.ObjectLib.WireCommon.Db">
+      <HintPath>$(BimDirectory)\Nanosoft.ObjectLib.WireCommon.Db.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Nanosoft.Electrica.Calc">
+      <HintPath>$(ElectricaDirectory)\Nanosoft.Electrica.Calc.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Nanosoft.ObjectLib.ESN">
+      <HintPath>$(ElectricaDirectory)\Nanosoft.ObjectLib.ESN.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+</Project>
