@@ -62,7 +62,9 @@ public sealed class HierarchyTestScenePainter
                 }
                 if (contour.DrawOutline)
                 {
-                    foreach (var trace in _objects.CreateOutline(net, drawnContour.CurvePnts, contour.OutlineDiameter))
+                    var vertices = contour.OutlineVertices.Length == 0 ? drawnContour.CurvePnts :
+                        contour.OutlineVertices.Select(p => new Point3d(contour.X + p[0], contour.Y + p[1], 0)).ToList();
+                    foreach (var trace in _objects.CreateOutline(net, vertices, contour.OutlineDiameter))
                     {
                         scene.Objects.Add(new HierarchyTestObject
                         {
@@ -151,6 +153,7 @@ public sealed class HierarchyTestScenePainter
         {
             var specification = description.Markers[i];
             var current = i == 0 ? marker : CreateMarker(net, specification);
+            if (specification.UsePosition) { current.MoveToPosition(new Point3d(specification.X, specification.Y, 0)); }
             current.MarkerLabel = specification.Label;
             current.IsMainFloorMarker = specification.IsMain;
             current.ZeroLevel = specification.Height;

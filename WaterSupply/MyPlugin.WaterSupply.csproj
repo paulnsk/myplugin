@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <PlatformTarget>x64</PlatformTarget>
+    <WaterSupplyDirectory>$(BimDirectory)\ProjectStudio\WS.Addin\AnyCPU\Debug\net6.0-windows</WaterSupplyDirectory>
+    <PipeNetDirectory>$(BimDirectory)\ProjectStudio\PipeNet\AnyCPU\Debug\net6.0-windows</PipeNetDirectory>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MyPlugin.csproj" />
+    <WaterSupplyReference Include="Nanosoft.WS.Addin;Nanosoft.WS.Model;Nanosoft.WS.Calc;Nanosoft.Piping.Common;Nanosoft.PipingDB;Nanosoft.PipingDB.WS" />
+    <Reference Include="@(WaterSupplyReference)">
+      <HintPath>$(WaterSupplyDirectory)\%(Identity).dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Nanosoft.PipeNet">
+      <HintPath>$(PipeNetDirectory)\Nanosoft.PipeNet.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+</Project>

@@ -68,6 +68,7 @@ internal static class McpRuntime
             new McpDatabaseTools(context, types).Register(tools);
             new McpObjectTools(context, types).Register(tools);
             new McpUgoCatalog(types).Register(tools);
+            new McpBlockTools(log).Register(tools);
             new McpStructureTools(context).Register(tools);
             foreach (var provider in providers)
             {

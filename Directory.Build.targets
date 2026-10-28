@@ -26,7 +26,7 @@
                       Lines="&lt;Project&gt;;&lt;PropertyGroup&gt;;&lt;PluginMajor&gt;$(PluginMajor)&lt;/PluginMajor&gt;;&lt;PluginMinor&gt;$(PluginMinor)&lt;/PluginMinor&gt;;&lt;PluginBuild&gt;$(PluginBuild)&lt;/PluginBuild&gt;;&lt;/PropertyGroup&gt;;&lt;/Project&gt;" />
   </Target>
   <Target Name="UpdateLatestPlugin" AfterTargets="Build"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(MSBuildProjectName)' == 'MyPlugin.Electrica'">
-    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)Update-Latest.ps1&quot; -BuildDirectory &quot;$(TargetDir).&quot;" />
+          Condition="'$(DesignTimeBuild)' != 'true' and ('$(MSBuildProjectName)' == 'MyPlugin' or '$(MSBuildProjectName)' == 'MyPlugin.Electrica' or '$(MSBuildProjectName)' == 'MyPlugin.WaterSupply')">
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)Update-Latest.ps1&quot; -BuildDirectory &quot;$(TargetDir).&quot; -AssemblyName &quot;$(AssemblyName)&quot;" />
   </Target>
 </Project>

@@ -304,6 +304,7 @@ internal sealed class HierarchyTestContour
     public bool DrawOutline;
     public bool ShowCaption = true;
     public double OutlineDiameter = 1000;
+    public double[][] OutlineVertices = Array.Empty<double[]>();
     // Локальные вершины; пустой массив означает обычный прямоугольник.
     public double[][] Vertices = Array.Empty<double[]>();
     public string[] Description = Array.Empty<string>();
@@ -320,6 +321,7 @@ internal sealed class HierarchyTestMarker
     public string Label = "";
     public bool IsMain = true;
     public bool BindToContour = true;
+    public bool UsePosition;
 }
 
 internal sealed class HierarchyTestPattern

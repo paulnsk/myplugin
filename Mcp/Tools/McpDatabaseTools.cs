@@ -51,9 +51,11 @@ internal sealed class McpDatabaseTools
                     properties
                 };
             });
+        var importSchema = ProductSchema();
+        importSchema["seriesProperty"] = McpSchema.String("Необязательно: строковое свойство серии/сортамента из database_get. Импортирует все изделия с тем же значением, без списка в ответе.");
         tools.Add("database_import",
-            "Import one selected external product and its dependencies into the project, synchronously. Returns the PROJECT dbId for objects_create.",
-            ProductSchema(), new[] { "type", "dbId", "sourcePath" }, Import, true);
+            "Импортировать изделие и зависимости в БД проекта. seriesProperty добавляет весь выбранный сортамент. Возвращает проектный dbId выбранного изделия.",
+            importSchema, new[] { "type", "dbId", "sourcePath" }, Import, true);
         tools.Add("database_update", "Изменить свойства изделия ТОЛЬКО в БД проекта. Внешние базы не изменяются. Поля — из types_describe(database=true).",
             new JObject
             {
@@ -131,11 +133,35 @@ internal sealed class McpDatabaseTools
         var target = Source(type, null);
         var item = source.GetDataTypedSource(type)?.GetDataObject(args.Value<int>("dbId"))
                    ?? throw new ArgumentException("DB record not found.");
-        //based on the stand's fixed GetLuminaireDbIds: no asynchronous ProgressShower/UserSelect.
-        var imported = ReferenceEquals(source, target)
-            ? item
-            : new DataBaseExporter(target).Export(item)
-              ?? throw new InvalidOperationException("Product import failed.");
-        return new { dbId = imported.Id, dbType = type.FullName, title = imported.Text, isProject = true };
+        var seriesProperty = args.Value<string>("seriesProperty");
+        var records = new[] { item };
+        if (seriesProperty != null)
+        {
+            var property = type.GetProperty(seriesProperty);
+            if (property == null || property.PropertyType != typeof(string) || property.GetMethod == null || property.GetIndexParameters().Length != 0)
+            {
+                throw new ArgumentException("seriesProperty должно быть читаемым строковым свойством изделия.");
+            }
+            var series = property.GetValue(item.Object) as string;
+            if (string.IsNullOrWhiteSpace(series))
+            {
+                throw new ArgumentException("У выбранного изделия не заполнено свойство серии; импорт всего пустого раздела не выполняется.");
+            }
+            records = source.GetDataTypedSource(type)!.DataObjects
+                .Where(x => string.Equals(property.GetValue(x.Object) as string, series, StringComparison.Ordinal)).ToArray();
+        }
+        // Один синхронный экспортёр сохраняет штатные зависимости и соответствие ID всей серии.
+        var exporter = new DataBaseExporter(target);
+        IDataObject? selected = null;
+        foreach (var record in records)
+        {
+            var imported = ReferenceEquals(source, target) ? record : exporter.Export(record)
+                ?? throw new InvalidOperationException("Не удалось импортировать изделие.");
+            if (record.Id == item.Id)
+            {
+                selected = imported;
+            }
+        }
+        return new { dbId = selected!.Id, count = records.Length };
     }
 }

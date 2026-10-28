@@ -11,5 +11,6 @@
     <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
     <ProjectReference Include="..\MyPlugin.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\Electrica\MyPlugin.Electrica.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\WaterSupply\MyPlugin.WaterSupply.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
 </Project>

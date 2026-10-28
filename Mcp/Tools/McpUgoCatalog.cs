@@ -21,7 +21,7 @@ internal sealed class McpUgoCatalog
     public void Register(McpToolRegistry tools)
     {
         ThrowIf.Argument.IsNull(tools, nameof(tools));
-        tools.Add("ugo_search", "УГО для точечного типа: имена/файлы, без картинок. Выбранные name/file передаются как ugoName/ugoFile в objects_create.",
+        tools.Add("ugo_search", "УГО для точечного типа: имена/файлы, без картинок. name/file — для objects_create. Геометрия УГО в закрытой базе DWG: block_get; правка: block_update, перенос: block_geometry_copy.",
             new JObject
             {
                 ["type"] = McpSchema.String("Тип из types_search."),

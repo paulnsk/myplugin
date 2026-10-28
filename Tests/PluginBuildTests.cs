@@ -14,16 +14,18 @@ public class PluginBuildTests
     private static string Configuration => new DirectoryInfo(TestContext.CurrentContext.TestDirectory).Parent!.Name;
     private static string Core => Path.Combine(Root, "bin", Configuration, "net6.0-windows");
     private static string Electrica => Path.Combine(Root, "Electrica", "bin", Configuration, "net6.0-windows");
+    private static string WaterSupply => Path.Combine(Root, "WaterSupply", "bin", Configuration, "net6.0-windows");
 
     [Test]
     public void Latest_contains_the_complete_current_build_without_vendor_dlls()
     {
         var latest = Path.Combine(Root, "artifacts", "LATEST");
         Assert.That(Directory.GetFiles(latest, "*.dll").Select(Path.GetFileName),
-            Is.EquivalentTo(new[] { "MyPlugin.dll", "MyPlugin.Electrica.dll" }));
-        foreach (var file in new[] { "MyPlugin.dll", "MyPlugin.Electrica.dll" })
+            Is.EquivalentTo(new[] { "MyPlugin.dll", "MyPlugin.Electrica.dll", "MyPlugin.WaterSupply.dll" }));
+        foreach (var file in new[] { "MyPlugin.dll", "MyPlugin.Electrica.dll", "MyPlugin.WaterSupply.dll" })
         {
-            var expected = System.Diagnostics.FileVersionInfo.GetVersionInfo(Path.Combine(Electrica, file)).ProductVersion;
+            var directory = file == "MyPlugin.WaterSupply.dll" ? WaterSupply : Electrica;
+            var expected = System.Diagnostics.FileVersionInfo.GetVersionInfo(Path.Combine(directory, file)).ProductVersion;
             Assert.That(System.Diagnostics.FileVersionInfo.GetVersionInfo(Path.Combine(latest, file)).ProductVersion, Is.EqualTo(expected));
         }
         Assert.That(File.Exists(Path.Combine(latest, "Mcp", "settings.json")), Is.True);
@@ -45,6 +47,7 @@ public class PluginBuildTests
         {
             "CW_MYPLUGIN_VERSION", "CW_MCP_START", "CW_MCP_STOP",
             "CW_HIERARCHY_TEST_GENERATE_SAMPLE", "CW_HIERARCHY_TEST_GENERATE_SAMPLE_ERROR",
+            "CW_HIERARCHY_TEST_GENERATE_ROTATIONS",
             "CW_HIERARCHY_TEST_GENERATE3D", "CW_HIERARCHY_TEST_GENERATE3D_ALL", "CW_HIERARCHY_TEST_VALIDATE"
         }));
     }
@@ -56,6 +59,8 @@ public class PluginBuildTests
         var module = System.Diagnostics.FileVersionInfo.GetVersionInfo(Path.Combine(Electrica, "MyPlugin.Electrica.dll"));
         Assert.That(core.ProductVersion, Does.Match(@"^0\.\d+\.\d+$"));
         Assert.That(module.ProductVersion, Is.EqualTo(core.ProductVersion));
+        var waterSupply = System.Diagnostics.FileVersionInfo.GetVersionInfo(Path.Combine(WaterSupply, "MyPlugin.WaterSupply.dll"));
+        Assert.That(waterSupply.ProductVersion, Is.EqualTo(core.ProductVersion));
     }
 
     [Test]
@@ -64,12 +69,16 @@ public class PluginBuildTests
         Assert.That(References(Core, "MyPlugin.dll"), Has.None.StartsWith("Nanosoft.Electrica"));
         Assert.That(References(Core, "MyPlugin.dll"), Has.None.StartsWith("Nanosoft.ObjectLib.ESN"));
         Assert.That(References(Electrica, "MyPlugin.Electrica.dll"), Does.Contain("MyPlugin"));
+        Assert.That(References(Core, "MyPlugin.dll"), Has.None.StartsWith("Nanosoft.WS"));
+        Assert.That(References(Core, "MyPlugin.dll"), Has.None.StartsWith("Nanosoft.Piping"));
+        Assert.That(References(WaterSupply, "MyPlugin.WaterSupply.dll"), Does.Contain("MyPlugin"));
+        Assert.That(References(WaterSupply, "MyPlugin.WaterSupply.dll"), Has.None.StartsWith("MyPlugin.Electrica"));
     }
 
     [Test]
     public void Build_outputs_do_not_contain_copies_of_vendor_dlls()
     {
-        foreach (var directory in new[] { Core, Electrica })
+        foreach (var directory in new[] { Core, Electrica, WaterSupply })
         {
             Assert.That(Directory.GetFiles(directory, "*.dll", SearchOption.AllDirectories)
                 .Select(Path.GetFileName), Has.All.StartsWith("MyPlugin"));
@@ -83,7 +92,9 @@ public class PluginBuildTests
         {
             "Mcp/settings.json", "Mcp/Skills/platform/SKILL.md", "Mcp/Skills/electrica/SKILL.md",
             "Mcp/Skills/electrica-lighting/SKILL.md", "Mcp/Skills/electrica-network/SKILL.md",
-            "Mcp/Skills/electrica-cables/SKILL.md", "Mcp/Tests/QuickStartPlans/План1.dwg", "Mcp/Tests/QuickStartPlans/План2.dwg"
+            "Mcp/Skills/electrica-cables/SKILL.md", "Mcp/Tests/QuickStartPlans/План1.dwg", "Mcp/Tests/QuickStartPlans/План2.dwg",
+            "Mcp/Skills/watersupply/SKILL.md", "Mcp/Skills/watersupply-settings/SKILL.md",
+            "Mcp/Skills/watersupply-pipes/SKILL.md", "Mcp/Skills/watersupply-calculation/SKILL.md"
         })
         {
             Assert.That(File.Exists(Path.Combine(Core, path)), Is.True, path);

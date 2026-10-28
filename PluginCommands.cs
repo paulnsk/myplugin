@@ -30,6 +30,9 @@ public class PluginCommands
     [CommandMethod("CW_HIERARCHY_TEST_GENERATE_SAMPLE_ERROR", CommandFlags.Session)]
     public void GenerateSampleError() => Run(() => Tests.Value.Generate(true));
 
+    [CommandMethod("CW_HIERARCHY_TEST_GENERATE_ROTATIONS", CommandFlags.Session)]
+    public void GenerateRotations() => Run(() => Tests.Value.GenerateRotations());
+
     [CommandMethod("CW_HIERARCHY_TEST_GENERATE3D", CommandFlags.Session)]
     public void Generate3D() => Run(() => Tests.Value.Export(false));
 

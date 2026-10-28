@@ -47,6 +47,27 @@ internal sealed class HierarchyTestServices
         command.Invoke();
     }
 
+    internal void GenerateRotations()
+    {
+        if (CwPlatform.ResolveNotNull<IApplicationInformation>().ApplicationType != ApplicationTypeEnum.Electrica)
+        {
+            throw new InvalidOperationException("Демонстрация поворотов создаётся в Электрике.");
+        }
+        var net = _projects.Create();
+        if (net == null) { return; }
+        _objects.ResetForProject();
+        var scene = HierarchyRotationScene.Create();
+        _painter.Draw(net, scene, "План 1");
+        _documents.ZoomAll();
+        var secondPlan = _projects.AddAndActivatePlan("План 2");
+        _painter.Draw(secondPlan, scene, "План 2");
+        _documents.ZoomAll();
+        _projects.ActivatePlan("План 1");
+        global::Nanosoft.Studio.Studio.Instance.Workspace.SaveAll();
+        CwPlatform.ResolveNotNull<IAcadHighlightManager>().AcadConsolePrint(
+            "\nПлан 1: ромашка из 12 двухэтажных зданий. План 2: башня из 10 этажей (0–90°). Выгрузка — штатной командой 3D по иерархии.");
+    }
+
     internal void Export(bool all)
     {
         var service = new HierarchyTestExportService(CwPlatform.ResolveNotNull<IHierarchy3DGenerationService>(),
