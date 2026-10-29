@@ -62,10 +62,13 @@ internal sealed class HierarchyTestServices
         var secondPlan = _projects.AddAndActivatePlan("План 2");
         _painter.Draw(secondPlan, scene, "План 2");
         _documents.ZoomAll();
+        var thirdPlan = _projects.AddAndActivatePlan("План 3");
+        _painter.Draw(thirdPlan, scene, "План 3");
+        _documents.ZoomAll();
         _projects.ActivatePlan("План 1");
         global::Nanosoft.Studio.Studio.Instance.Workspace.SaveAll();
         CwPlatform.ResolveNotNull<IAcadHighlightManager>().AcadConsolePrint(
-            "\nПлан 1: ромашка из 12 двухэтажных зданий. План 2: башня из 10 этажей (0–90°). Выгрузка — штатной командой 3D по иерархии.");
+            "\nПлан 1: ромашка. План 2: закрученная башня. План 3: Академпарк с переходом. Выгрузка — штатной командой 3D по иерархии.");
     }
 
     internal void Export(bool all)

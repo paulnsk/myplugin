@@ -332,6 +332,7 @@ internal sealed class HierarchyTestPattern
     public double Y;
     public double Cell;
     public double LightHeight = 3000;
+    public bool CompactLuminaire;
 }
 
 internal sealed class HierarchyTestObject

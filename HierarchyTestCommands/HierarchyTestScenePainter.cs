@@ -216,7 +216,7 @@ public sealed class HierarchyTestScenePainter
         HierarchyTestScene scene,
         HierarchyTestPattern pattern)
     {
-        int? productId = null;
+        int? productId = pattern.CompactLuminaire ? _objects.GetCompactLuminaireDbId() : null;
         var index = 0;
         IAcadNode Place(double x, double y)
         {

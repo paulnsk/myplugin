@@ -26,6 +26,7 @@ public sealed class ElectricaHierarchyTestObjectBuilder
     private MethodInfo? _createTraceMethod;
     private List<int>? _luminaireDbIds;
     private int _luminaireIndex;
+    private int? _compactLuminaireDbId;
     private readonly Dictionary<double, int> _outlineConfigurationsByDiameter = new();
     private Type? _outlineCanalType;
 
@@ -53,6 +54,7 @@ public sealed class ElectricaHierarchyTestObjectBuilder
     {
         _luminaireDbIds = null;
         _luminaireIndex = 0;
+        _compactLuminaireDbId = null;
         _outlineConfigurationsByDiameter.Clear();
     }
 
@@ -205,6 +207,21 @@ public sealed class ElectricaHierarchyTestObjectBuilder
         previousCanal?.Delete();
         ((IDbIdProvider)canal).DbId = configurationId;
         trace.AddChild(canal);
+    }
+
+    internal int GetCompactLuminaireDbId()
+    {
+        if (_compactLuminaireDbId.HasValue) { return _compactLuminaireDbId.Value; }
+        var lightingType = ResolveLightingType() ?? throw new InvalidOperationException("Тип ElLighting не найден.");
+        var ids = GetLuminaireDbIds(lightingType);
+        if (ids.Count == 0) { throw new InvalidOperationException("В БД не найдены светильники."); }
+        var dbType = lightingType.GetCustomAttributes(typeof(DbMapTypeAttribute), false).Cast<DbMapTypeAttribute>().First().DbType;
+        var dimensions = dbType.GetProperties().Where(x => x.Name is "LightLength" or "Width" or "Diameter").ToArray();
+        var products = _databaseProxyComponent.GetDb(dbType).GetDataTypedSource(dbType).DataObjects;
+        _compactLuminaireDbId = products.Where(x => ids.Contains(x.Id)).OrderBy(x => dimensions
+            .Select(p => p.GetValue(x.Object) is double value ? value : 0)
+            .Where(value => value > 0).DefaultIfEmpty(double.PositiveInfinity).Max()).First().Id;
+        return _compactLuminaireDbId.Value;
     }
 
     private void BindLuminaireProduct(

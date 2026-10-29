@@ -13,6 +13,7 @@ internal static class HierarchyRotationScene
         var scene = new HierarchyTestScene();
         Flower(scene);
         Tower(scene);
+        HierarchyAcademparkScene.AddTo(scene);
         return scene;
     }
 
@@ -64,7 +65,7 @@ internal static class HierarchyRotationScene
         }
     }
 
-    private static void AddFloor(
+    internal static HierarchyTestContour AddFloor(
         HierarchyTestScene scene,
         HierarchyTestContour building,
         int number,
@@ -90,9 +91,10 @@ internal static class HierarchyRotationScene
         {
             ContourKey = floor.Key, Word = $"F{number}", X = x + 9000, Y = y + textY, Cell = 600, LightHeight = 3000
         });
+        return floor;
     }
 
-    private static HierarchyTestContour Rectangle(
+    internal static HierarchyTestContour Rectangle(
         string key,
         string kind,
         string plan,
