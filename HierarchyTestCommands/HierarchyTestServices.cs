@@ -71,6 +71,43 @@ internal sealed class HierarchyTestServices
             "\nПлан 1: ромашка. План 2: закрученная башня. План 3: Академпарк с переходом. Выгрузка — штатной командой 3D по иерархии.");
     }
 
+    internal void GenerateBasic()
+    {
+        if (CwPlatform.ResolveNotNull<IApplicationInformation>().ApplicationType != ApplicationTypeEnum.Electrica)
+        {
+            throw new InvalidOperationException("Базовый пример иерархии создаётся в Электрике.");
+        }
+        var net = _projects.Create();
+        if (net == null) { return; }
+        _objects.ResetForProject();
+        var scene = HierarchyBasicScene.Create();
+        _painter.Draw(net, scene, "План 1");
+        _documents.ZoomAll();
+        var secondPlan = _projects.AddAndActivatePlan("План 2");
+        _painter.Draw(secondPlan, scene, "План 2");
+        _documents.ZoomAll();
+        _projects.ActivatePlan("План 1");
+        global::Nanosoft.Studio.Studio.Instance.Workspace.SaveAll();
+        CwPlatform.ResolveNotNull<IAcadHighlightManager>().AcadConsolePrint(
+            "\nПлан 1: территория, зона и её отдельная копия. План 2: копия зоны с отметкой +5 м. Выгрузка — штатной командой 3D по иерархии.");
+    }
+
+    internal void GeneratePsa12722()
+    {
+        if (CwPlatform.ResolveNotNull<IApplicationInformation>().ApplicationType != ApplicationTypeEnum.Electrica)
+        {
+            throw new InvalidOperationException("Пример PSA-12722 создаётся в Электрике.");
+        }
+        var net = _projects.Create();
+        if (net == null) { return; }
+        _objects.ResetForProject();
+        _painter.Draw(net, HierarchyPsa12722Scene.Create(), "План 1");
+        _documents.ZoomAll();
+        global::Nanosoft.Studio.Studio.Instance.Workspace.SaveAll();
+        CwPlatform.ResolveNotNull<IAcadHighlightManager>().AcadConsolePrint(
+            "\nPSA-12722: кейсы рядами, над каждым — что проверять. Выгрузка — штатной командой 3D по иерархии.");
+    }
+
     internal void Export(bool all)
     {
         var service = new HierarchyTestExportService(CwPlatform.ResolveNotNull<IHierarchy3DGenerationService>(),

@@ -33,6 +33,12 @@ public class PluginCommands
     [CommandMethod("CW_HIERARCHY_TEST_GENERATE_ROTATIONS", CommandFlags.Session)]
     public void GenerateRotations() => Run(() => Tests.Value.GenerateRotations());
 
+    [CommandMethod("CW_HIERARCHY_TEST_GENERATE_BASIC", CommandFlags.Session)]
+    public void GenerateBasic() => Run(() => Tests.Value.GenerateBasic());
+
+    [CommandMethod("CW_HIERARCHY_TEST_GENERATE_PSA12722", CommandFlags.Session)]
+    public void GeneratePsa12722() => Run(() => Tests.Value.GeneratePsa12722());
+
     [CommandMethod("CW_HIERARCHY_TEST_GENERATE3D", CommandFlags.Session)]
     public void Generate3D() => Run(() => Tests.Value.Export(false));
 

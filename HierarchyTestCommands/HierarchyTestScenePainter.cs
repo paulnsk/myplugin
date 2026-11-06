@@ -55,15 +55,24 @@ public sealed class HierarchyTestScenePainter
         {
             foreach (var contour in scene.Contours.Where(x => x.Plan == plan))
             {
-                var drawnContour = DrawContour(net, contour);
+                DrawContour(net, contour);
                 if (contour.ShowCaption)
                 {
                     DrawCaption(contour);
                 }
                 if (contour.DrawOutline)
                 {
-                    var vertices = contour.OutlineVertices.Length == 0 ? drawnContour.CurvePnts :
-                        contour.OutlineVertices.Select(p => new Point3d(contour.X + p[0], contour.Y + p[1], 0)).ToList();
+                    var outline = contour.OutlineVertices;
+                    if (outline.Length == 0)
+                    {
+                        var boundary = contour.Vertices.Length > 0 ? contour.Vertices : new[]
+                        {
+                            new[] { 0d, 0d }, new[] { contour.Width, 0d }, new[] { contour.Width, contour.Height },
+                            new[] { 0d, contour.Height }, new[] { 0d, 0d }
+                        };
+                        outline = HierarchyTestOutline.Inset(boundary, 500);
+                    }
+                    var vertices = outline.Select(p => new Point3d(contour.X + p[0], contour.Y + p[1], 0)).ToList();
                     foreach (var trace in _objects.CreateOutline(net, vertices, contour.OutlineDiameter))
                     {
                         scene.Objects.Add(new HierarchyTestObject
@@ -87,7 +96,7 @@ public sealed class HierarchyTestScenePainter
     }
 
     //based on HierarchyTestContourBuilder из внешнего тестового стенда.
-    private ILocalCoordinateSystemContour DrawContour(IAcadNet net, HierarchyTestContour description)
+    private void DrawContour(IAcadNet net, HierarchyTestContour description)
     {
         var x = description.X;
         var y = description.Y;
@@ -147,7 +156,7 @@ public sealed class HierarchyTestScenePainter
         if (description.Markers.Count == 0)
         {
             marker.Delete();
-            return contour;
+            return;
         }
         for (var i = 0; i < description.Markers.Count; i++)
         {
@@ -163,7 +172,6 @@ public sealed class HierarchyTestScenePainter
             current.UpdateView();
             specification.Id = current.AcId.ToGuid();
         }
-        return contour;
     }
 
     private TbFloorMarker CreateMarker(IAcadNet net, HierarchyTestMarker specification)

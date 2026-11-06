@@ -296,13 +296,23 @@ public sealed class HierarchyTestExportService
             _inner = inner;
             _silent = silent;
         }
-        public void Show(IReadOnlyList<OperationOutputEntry> diagnostics, bool forceShow = false)
+        public void ShowHierarchyBuilt(IReadOnlyList<OperationOutputEntry> diagnostics)
         {
             ThrowIf.Argument.IsNull(diagnostics, nameof(diagnostics));
             Diagnostics.AddRange(diagnostics);
             if (!_silent)
             {
-                _inner.Show(diagnostics, forceShow);
+                _inner.ShowHierarchyBuilt(diagnostics);
+            }
+        }
+
+        public void ShowOperationCompleted(IReadOnlyList<OperationOutputEntry> diagnostics, bool forceShow = false)
+        {
+            ThrowIf.Argument.IsNull(diagnostics, nameof(diagnostics));
+            Diagnostics.AddRange(diagnostics);
+            if (!_silent)
+            {
+                _inner.ShowOperationCompleted(diagnostics, forceShow);
             }
         }
     }
