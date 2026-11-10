@@ -1,7 +1,7 @@
 ﻿<Project>
 <PropertyGroup>
 <PluginMajor>0</PluginMajor>
-<PluginMinor>4</PluginMinor>
-<PluginBuild>1</PluginBuild>
+<PluginMinor>5</PluginMinor>
+<PluginBuild>2</PluginBuild>
 </PropertyGroup>
 </Project>

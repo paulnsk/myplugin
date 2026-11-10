@@ -92,20 +92,25 @@ internal sealed class HierarchyTestServices
             "\nПлан 1: территория, зона и её отдельная копия. План 2: копия зоны с отметкой +5 м. Выгрузка — штатной командой 3D по иерархии.");
     }
 
-    internal void GeneratePsa12722()
+    internal void GeneratePsa12722() => GenerateTaskScene("PSA-12722", HierarchyPsa12722Scene.Create(),
+        "кейсы рядами, над каждым — что проверять. Выгрузка — штатной командой 3D по иерархии.");
+
+    internal void GeneratePsa12707() => GenerateTaskScene("PSA-12707", HierarchyPsa12707Scene.Create(),
+        "откройте «Модель объекта»: что поменять и что произойдёт, написано в Id контуров.");
+
+    private void GenerateTaskScene(string task, HierarchyTestScene scene, string hint)
     {
         if (CwPlatform.ResolveNotNull<IApplicationInformation>().ApplicationType != ApplicationTypeEnum.Electrica)
         {
-            throw new InvalidOperationException("Пример PSA-12722 создаётся в Электрике.");
+            throw new InvalidOperationException($"Пример {task} создаётся в Электрике.");
         }
         var net = _projects.Create();
         if (net == null) { return; }
         _objects.ResetForProject();
-        _painter.Draw(net, HierarchyPsa12722Scene.Create(), "План 1");
+        _painter.Draw(net, scene, "План 1");
         _documents.ZoomAll();
         global::Nanosoft.Studio.Studio.Instance.Workspace.SaveAll();
-        CwPlatform.ResolveNotNull<IAcadHighlightManager>().AcadConsolePrint(
-            "\nPSA-12722: кейсы рядами, над каждым — что проверять. Выгрузка — штатной командой 3D по иерархии.");
+        CwPlatform.ResolveNotNull<IAcadHighlightManager>().AcadConsolePrint($"\n{task}: {hint}");
     }
 
     internal void Export(bool all)

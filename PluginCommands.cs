@@ -39,6 +39,9 @@ public class PluginCommands
     [CommandMethod("CW_HIERARCHY_TEST_GENERATE_PSA12722", CommandFlags.Session)]
     public void GeneratePsa12722() => Run(() => Tests.Value.GeneratePsa12722());
 
+    [CommandMethod("CW_HIERARCHY_TEST_GENERATE_PSA12707", CommandFlags.Session)]
+    public void GeneratePsa12707() => Run(() => Tests.Value.GeneratePsa12707());
+
     [CommandMethod("CW_HIERARCHY_TEST_GENERATE3D", CommandFlags.Session)]
     public void Generate3D() => Run(() => Tests.Value.Export(false));
 

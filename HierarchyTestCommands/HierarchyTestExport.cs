@@ -112,7 +112,7 @@ public sealed class HierarchyTestExportService
         var originalSelection = (IHierarchySelectionService)selectionField.GetValue(_generation)!;
         var originalReporter = (IAreaHierarchyDiagnosticsReporter)reporterField.GetValue(_generation)!;
         var selection = new RecordingSelection(originalSelection, automatic);
-        var reporter = new RecordingReporter(originalReporter, automatic != null);
+        var reporter = RecordingReporter.Create(originalReporter, automatic != null);
         FieldInfo? messageBoxField = null;
         IDialogStackMessageBox? originalMessageBox = null;
         RecordingMessageBox? messageBox = null;
@@ -285,35 +285,33 @@ public sealed class HierarchyTestExportService
         }
     }
 
-    private sealed class RecordingReporter : IAreaHierarchyDiagnosticsReporter
+    /// <summary>
+    /// Методы репортера в разных ветках ProjectStudio называются по-разному. Прокси реализует интерфейс той сборки,
+    /// с которой запущен плагин, и не называет ни одного метода: запоминает диагностику из любого вызова и пересылает его.
+    /// </summary>
+    internal class RecordingReporter : DispatchProxy
     {
-        private readonly IAreaHierarchyDiagnosticsReporter _inner;
-        private readonly bool _silent;
+        private IAreaHierarchyDiagnosticsReporter _inner = null!;
+        private bool _silent;
         internal readonly List<OperationOutputEntry> Diagnostics = new();
-        internal RecordingReporter(IAreaHierarchyDiagnosticsReporter inner, bool silent)
+
+        internal static RecordingReporter Create(IAreaHierarchyDiagnosticsReporter inner, bool silent)
         {
             ThrowIf.Argument.IsNull(inner, nameof(inner));
-            _inner = inner;
-            _silent = silent;
-        }
-        public void ShowHierarchyBuilt(IReadOnlyList<OperationOutputEntry> diagnostics)
-        {
-            ThrowIf.Argument.IsNull(diagnostics, nameof(diagnostics));
-            Diagnostics.AddRange(diagnostics);
-            if (!_silent)
-            {
-                _inner.ShowHierarchyBuilt(diagnostics);
-            }
+            var reporter = (RecordingReporter)(object)Create<IAreaHierarchyDiagnosticsReporter, RecordingReporter>();
+            reporter._inner = inner;
+            reporter._silent = silent;
+            return reporter;
         }
 
-        public void ShowOperationCompleted(IReadOnlyList<OperationOutputEntry> diagnostics, bool forceShow = false)
+        protected override object? Invoke(MethodInfo? targetMethod, object?[]? args)
         {
-            ThrowIf.Argument.IsNull(diagnostics, nameof(diagnostics));
-            Diagnostics.AddRange(diagnostics);
-            if (!_silent)
+            ThrowIf.Argument.IsNull(targetMethod, nameof(targetMethod));
+            foreach (var diagnostics in (args ?? Array.Empty<object?>()).OfType<IEnumerable<OperationOutputEntry>>())
             {
-                _inner.ShowOperationCompleted(diagnostics, forceShow);
+                Diagnostics.AddRange(diagnostics);
             }
+            return _silent ? null : targetMethod.Invoke(_inner, args);
         }
     }
 }
