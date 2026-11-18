@@ -300,6 +300,10 @@ internal sealed class HierarchyTestContour
     public int BuildingNumber;
     public int FloorNumber;
     public double FloorHeight;
+    // Высота этажа (не отметка); 0 — оставить значение продукта по умолчанию.
+    public double StoreyHeight;
+    // Наименование здания у этажа; null — «Тестовое здание N».
+    public string? BuildingDescription;
     public bool GeometricMarker;
     public bool DrawOutline;
     public bool ShowCaption = true;

@@ -25,8 +25,13 @@ public sealed class HierarchyTestProjectService
         _engProjectService = engProjectService;
     }
 
-    internal IAcadNet? Create()
+    internal IAcadNet? Create() => Create(ProjectTypes.Electrica, HierarchyTestConstants.RootDirectory);
+
+    /// <summary>Новый проект указанного типа в новой GUID-папке внутри rootDirectory; null — пользователь не закрыл прежний.</summary>
+    internal IAcadNet? Create(string projectTypeName, string rootDirectory)
     {
+        ThrowIf.Argument.IsNull(projectTypeName, nameof(projectTypeName));
+        ThrowIf.Argument.IsNull(rootDirectory, nameof(rootDirectory));
         var studio = global::Nanosoft.Studio.Studio.Instance;
         var workspace = studio.Workspace;
         ThrowIf.Variable.IsNull(workspace, nameof(workspace));
@@ -39,10 +44,10 @@ public sealed class HierarchyTestProjectService
             }
         }
 
-        var projectType = studio.PrjTypes.FirstOrDefault(x => x.Name == ProjectTypes.Electrica)
-            ?? throw new InvalidOperationException("Тип проекта Электрика не найден.");
+        var projectType = studio.PrjTypes.FirstOrDefault(x => x.Name == projectTypeName)
+            ?? throw new InvalidOperationException($"Тип проекта {projectTypeName} не найден.");
         var projectName = Guid.NewGuid().ToString();
-        var directoryPath = Path.Combine(HierarchyTestConstants.RootDirectory, projectName);
+        var directoryPath = Path.Combine(rootDirectory, projectName);
         Directory.CreateDirectory(directoryPath);
         var projectPath = Path.Combine(directoryPath, projectName + ".csp");
         workspace.AddNew(projectType, projectPath);

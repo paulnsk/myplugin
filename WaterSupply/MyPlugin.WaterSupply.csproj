@@ -2,6 +2,7 @@
   <PropertyGroup>
     <TargetFramework>net6.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
     <Nullable>enable</Nullable>
     <PlatformTarget>x64</PlatformTarget>
     <WaterSupplyDirectory>$(BimDirectory)\ProjectStudio\WS.Addin\AnyCPU\Debug\net6.0-windows</WaterSupplyDirectory>

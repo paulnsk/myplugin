@@ -42,6 +42,16 @@ public class PluginCommands
     [CommandMethod("CW_HIERARCHY_TEST_GENERATE_PSA12707", CommandFlags.Session)]
     public void GeneratePsa12707() => Run(() => Tests.Value.GeneratePsa12707());
 
+    // Демо ВК строит модуль MyPlugin.WaterSupply; запускать в nanoCAD BIM ВК.
+    [CommandMethod("CW_HIERARCHY_TEST_GENERATE_PSA12661_OLD", CommandFlags.Session)]
+    public void GeneratePsa12661Old() => Run(() => ProductModules.GenerateDemo("PSA12661_OLD"));
+
+    [CommandMethod("CW_HIERARCHY_TEST_GENERATE_PSA12661_BOILER", CommandFlags.Session)]
+    public void GeneratePsa12661Boiler() => Run(() => ProductModules.GenerateDemo("PSA12661_BOILER"));
+
+    [CommandMethod("CW_HIERARCHY_TEST_GENERATE_PSA12661_NO_FLOORS", CommandFlags.Session)]
+    public void GeneratePsa12661NoFloors() => Run(() => ProductModules.GenerateDemo("PSA12661_NO_FLOORS"));
+
     [CommandMethod("CW_HIERARCHY_TEST_GENERATE3D", CommandFlags.Session)]
     public void Generate3D() => Run(() => Tests.Value.Export(false));
 

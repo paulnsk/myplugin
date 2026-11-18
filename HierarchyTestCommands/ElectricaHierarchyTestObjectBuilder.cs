@@ -268,47 +268,8 @@ public sealed class ElectricaHierarchyTestObjectBuilder
             return _luminaireDbIds = new List<int>();
         }
 
-        var projectSource = _databaseProxyComponent.GetDb(dbType);
-        var result = projectSource.GetDataTypedSource(dbType).DataObjects
-            .Take(HierarchyTestConstants.MaximumLuminaireProducts)
-            .Select(x => x.Id)
-            .ToList();
-        if (result.Count > 0)
-        {
-            return _luminaireDbIds = result;
-        }
-
-        var demoSource = FindDemoSource(dbType, projectSource);
-        var demoObjects = demoSource?.GetDataTypedSource(dbType).DataObjects;
-        if (demoObjects == null)
-        {
-            return _luminaireDbIds = result;
-        }
-
-        foreach (var dataObject in demoObjects.Take(HierarchyTestConstants.MaximumLuminaireProducts))
-        {
-            // Прямой импорт синхронный, без отложенного показа ProgressShower.
-            var exported = new DataBaseExporter(projectSource).Export(dataObject)
-                ?? throw new InvalidOperationException($"Не удалось импортировать светильник «{dataObject.Text}» в тестовый проект.");
-            result.Add(exported.Id);
-        }
-
-        return _luminaireDbIds = result;
-    }
-
-    private static IDataSource? FindDemoSource(Type dbType, IDataSource projectSource)
-    {
-        foreach (IDataBaseInfo info in AddIn.DataBase.AllSources)
-        {
-            var source = info.DataSource;
-            if (!ReferenceEquals(source, projectSource) &&
-                source.GetDataTypedSource(dbType).DataObjects.Count > 0)
-            {
-                return source;
-            }
-        }
-
-        return null;
+        return _luminaireDbIds = ProjectDatabaseProducts.GetOrImport(
+            _databaseProxyComponent, dbType, HierarchyTestConstants.MaximumLuminaireProducts);
     }
 
     private Type? ResolveLightingType()
