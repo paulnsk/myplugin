@@ -131,7 +131,7 @@ internal sealed class WaterSupplyNetworkTools
         var limit = Math.Clamp(args.Value<int?>("limit") ?? 10, 1, 30);
         try
         {
-            var nets = CwPlatform.ResolveNotNull<IWsProjectCalculator>().Calculate(project, false).ToArray();
+            var nets = CwPlatform.ResolveNotNull<IWsProjectCalculator>().Calculate(project, false).Nets.ToArray();
             return new
             {
                 total = nets.Length,
