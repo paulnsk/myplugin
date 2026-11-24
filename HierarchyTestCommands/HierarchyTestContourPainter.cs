@@ -134,15 +134,16 @@ public sealed class HierarchyTestContourPainter
             new Point3d(specification.X, specification.Y, 0), 0, Point3d.AxeZ);
     }
 
-    internal void DrawCaption(HierarchyTestContour contour)
+    /// <param name="brief">Без строки маркера: только ключ, имя и отметка этажа.</param>
+    internal void DrawCaption(HierarchyTestContour contour, bool brief = false)
     {
         var font = Math.Max(350, Math.Min(contour.Width, contour.Height) / 40) * 1.5;
-        var lines = new List<string> { $"{contour.Key}: {contour.Name}" };
-        lines.Add(contour.Markers.Count == 0 ? "Маркер отсутствует" :
-            $"Маркер {contour.Markers[0].Rotation:0.#}°; высота {contour.Markers[0].Height:0} мм");
-        if (contour.Kind == "Floor")
+        var floorHeight = contour.Kind == "Floor" ? $" ({contour.FloorHeight:0} мм)" : string.Empty;
+        var lines = new List<string> { $"{contour.Key}: {contour.Name}{floorHeight}" };
+        if (!brief)
         {
-            lines.Add($"Отметка этажа {contour.FloorHeight:0} мм");
+            lines.Add(contour.Markers.Count == 0 ? "Маркер отсутствует" :
+                $"Маркер {contour.Markers[0].Rotation:0.#}°; высота {contour.Markers[0].Height:0} мм");
         }
         Text(contour.X, contour.Y + contour.Height + font * (lines.Count * 1.5 + 1), font, lines);
         if (contour.Description.Length > 0)

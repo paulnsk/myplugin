@@ -176,7 +176,7 @@ internal sealed class McpObjectTools
             obj.AcId.paperId,
             position = node == null ? null : Coordinates(node.AreaPosition),
             dbId = (obj as IDbIdProvider)?.DbId,
-            dbType = obj is IDbIdProvider ? obj.DbRef?.GetType().FullName : null,
+            dbType = obj is IDbIdProvider ? ((IRefToDb)obj).RefToDb?.GetType().FullName : null,
             properties = detailed ? McpProperties.Read(obj, selectedFields?.Contains("*") == true ? null : selectedFields) : null,
             vertices = !geometry ? null : obj switch
             {

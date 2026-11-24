@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Guard;
 using Nanosoft.Acad;
+using Nanosoft.Acad.Ifaces;
+using Nanosoft.Acad.Interop.Enum;
+using Nanosoft.Acad.Interop.NativeComponent;
 using Nanosoft.Acad.Net;
 using Nanosoft.Piping.Common.Fixture;
 using Nanosoft.Piping.Common.Pipes;
@@ -20,12 +23,24 @@ namespace MyPlugin.WaterSupply.Psa12661;
 internal sealed class WaterSupplyDemoObjects
 {
     internal const double PipeHeight = 300;
+    // Имя шаблона выноски, которого нет ни у одного шаблона продукта: штатное обновление выносок её не трогает (как PlanSignNotes).
+    private const string LabelPattern = "Psa12661NetLabel";
+    // Выноска прямо над объектом.
+    private const double LabelRise = 600;
+    // Высота текста в модели, мм — как подписи этажей и зон стенда (HierarchyTestContourPainter.DrawCaption).
+    private const double LabelTextHeight = 525;
+    // Яркие на тёмном фоне; без зелёного — им «Показать сеть» подсвечивает объекты сети.
+    private static readonly CwColor[] LabelColors = { CwColors.Red, CwColors.Yellow, CwColors.Magenta, CwColors.DarkOrange, CwColors.DodgerBlue };
 
     private readonly IWoObjectFactory _factory;
     private readonly IUgoTypes _ugoTypes;
     private readonly IUgoBaseComponent _ugoBase;
     private readonly IAcadTraceManager _traces;
     private readonly IAcadNetFactory _nets;
+    private readonly IWoAttributeManager _attributes;
+    private readonly INoteService _notes;
+    private readonly ICadDocumentScale _scale;
+    private readonly IAcadLayerService _layers;
     private readonly WaterSupplyDemoSetup _setup;
     private readonly Action<string> _log;
     private readonly Dictionary<Type, int?> _productIds = new();
@@ -39,6 +54,10 @@ internal sealed class WaterSupplyDemoObjects
         _ugoBase = CwPlatform.ResolveNotNull<IUgoBaseComponent>();
         _traces = CwPlatform.ResolveNotNull<IAcadTraceManager>();
         _nets = CwPlatform.ResolveNotNull<IAcadNetFactory>();
+        _attributes = CwPlatform.ResolveNotNull<IWoAttributeManager>();
+        _notes = CwPlatform.ResolveNotNull<INoteService>();
+        _scale = CwPlatform.ResolveNotNull<ICadDocumentScale>();
+        _layers = CwPlatform.ResolveNotNull<IAcadLayerService>();
         _setup = setup;
         _log = log;
     }
@@ -93,6 +112,32 @@ internal sealed class WaterSupplyDemoObjects
         item.Name = name;
         item.Length = length;
         return Save(item);
+    }
+
+    /// <summary>
+    /// Выноска с текстом на вводе или разрыве: «Сеть 4», «Сеть 4 →», «→ Сеть 4».
+    /// Цвета у выноски нет, поэтому выноски каждой сети лежат на своём цветном слое.
+    /// </summary>
+    internal T Label<T>(T node, (int Net, string Text) label) where T : IAcadNode
+    {
+        var text = label.Text;
+        var position = Position(node) + new Point3d(0, LabelRise, 0);
+        var note = _attributes.AddNoteToObject(node.AcId, (int)CadNoteTypeList.UP_LINE_TYPE, LabelPattern,
+            (int)AcadNoteLineArrow.SIMPLE_LINE, new[] { text }, position, _notes.NoteShift);
+        if (note.IsNull)
+        {
+            _log($"Выноска «{text}» на «{node.TitleName}» не создана.");
+            return node;
+        }
+        // Размер текста выноски задаётся в мм бумаги.
+        if (node.Net.OpenObject(note) is AcadAttributeNote attributeNote)
+        {
+            attributeNote.TextSize = LabelTextHeight / _scale.GetPaperScale(node.AcId.paperId);
+            // Иначе слой выноски по правилу из настроек проекта вернётся в «ВК_Выноски».
+            attributeNote.NoteLayerRule = NoteLayerRule.AsIs;
+            _layers.SetObjectLayer(attributeNote, new AcadSystemLayer($"PSA12661_Сеть_{label.Net}", LabelColors[(label.Net - 1) % LabelColors.Length]));
+        }
+        return node;
     }
 
     /// <summary>Труба между узлами через промежуточные точки; у многоточечного прибора — ближайшая точка подключения.</summary>
@@ -176,6 +221,54 @@ internal sealed class WaterSupplyDemoObjects
         Step($"магистраль «{previous.title}» → «{end.TitleName}»");
         Configure(Link(net, previous.id, last.AcId, previous.position, to, previous.cp, lastCp,
             $"отрезок магистрали до «{end.TitleName}»").AcId);
+    }
+
+    /// <summary>
+    /// Сеть с кольцом от start до end: труба до развилки, от неё две ветви — прямая и обходная (сбоку на detour) —
+    /// сходятся в точке слияния, дальше труба к end. Развилка и слияние собраны как тройники в Main:
+    /// к концу одной трубы явно подключены две другие. WS_CALC должен дать ошибку «циклы в рамках одной системы».
+    /// </summary>
+    internal void Ring(IAcadNode start, IAcadNode end, double forkOffset, double ringLength, double detour)
+    {
+        var net = _nets.NewNet();
+        var first = Reopen(net, start);
+        var last = Reopen(net, end);
+        var firstCp = NearestCp(first, Position(last));
+        var lastCp = NearestCp(last, Position(first));
+        if (firstCp < 0 || lastCp < 0)
+        {
+            Fail($"У «{start.TitleName}» или «{end.TitleName}» нет точки подключения — кольцо не проложено.");
+        }
+        var from = first.GetCpPosition(firstCp);
+        var to = last.GetCpPosition(lastCp);
+        var direction = (to - from) * (1 / (to - from).Length());
+        var aside = new Point3d(-direction.Y, direction.X, 0) * detour;
+        var fork = from + direction * forkOffset;
+        var join = fork + direction * ringLength;
+
+        Step("кольцо: труба до развилки");
+        var lead = Configure(Link(net, first.AcId, first.AcId, from, fork, firstCp, -1, "труба до развилки кольца").AcId);
+        var forkCp = CpAt(lead, fork, "развилки кольца");
+        Step("кольцо: прямая ветвь");
+        var straight = Configure(Link(net, lead.AcId, lead.AcId, fork, join, forkCp, -1, "прямая ветвь кольца").AcId);
+        var joinCp = CpAt(straight, join, "слияния кольца");
+        Step("кольцо: обходная ветвь");
+        var bypass = _traces.LinkObjects<TbTrace>(net, lead.AcId, straight.AcId, fork, join, forkCp, joinCp,
+                         null!, string.Empty, new List<Point3d> { fork + aside, join + aside })
+                     ?? throw new WaterSupplyDemoStepException("Не создана обходная ветвь кольца.");
+        Configure(bypass.AcId);
+        Step($"кольцо: труба к «{end.TitleName}»");
+        Configure(Link(net, straight.AcId, last.AcId, join, to, joinCp, lastCp, $"труба от кольца к «{end.TitleName}»").AcId);
+    }
+
+    private static int CpAt(AcadTrace trace, Point3d position, string what)
+    {
+        var cp = trace.GetCpIndexByPosition(position);
+        if (cp < 0)
+        {
+            Fail($"У трубы нет точки подключения в точке {what}.");
+        }
+        return cp;
     }
 
     private AcadTrace Link(IAcadNet net, GlobalId firstId, GlobalId secondId, Point3d firstPosition, Point3d secondPosition,

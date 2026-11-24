@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Evos.Api.Model.Output;
 using Nanosoft.Acad;
 using Nanosoft.Acad.Interop.NativeComponent;
 using Nanosoft.Acad.Net;
+using Nanosoft.CAE.Module.BuildingModel.AreaHierarchy.Processors.Builder;
+using Nanosoft.CAE.Module.BuildingModel.AreaHierarchy.Processors.PlanObjects;
 using Nanosoft.Piping.Common.Base;
 using Nanosoft.Piping.Common.Ifaces;
 using Nanosoft.Piping.Common.Pipes;
@@ -30,6 +33,7 @@ public sealed class WaterSupplyDemoGenerator : IProductDemoGenerator
         Action<WaterSupplyPsa12661Scenes>? build = demoId switch
         {
             "PSA12661_OLD" => x => x.Old(),
+            "PSA12816_ERROR_LOOP" => x => x.ErrorLoop(),
             "PSA12661_BOILER" => x => x.Boiler(),
             "PSA12661_NO_FLOORS" => x => x.NoFloors(),
             _ => null
@@ -136,7 +140,9 @@ public sealed class WaterSupplyDemoGenerator : IProductDemoGenerator
         var net = CwPlatform.ResolveNotNull<IAcadNetFactory>().NewNet();
         net.Load(false);
         var consumers = net.Nodes.OfType<ConsumerBase>().Count();
-        var nets = new TbNetBuilder(net, CwPlatform.ResolveNotNull<IWaterSystemService>(), checks, standPipes).BuildNets();
+        var hierarchy = CwPlatform.ResolveNotNull<IAreaHierarchyBuilder>().Build(net, new List<OperationOutputEntry>());
+        var contourByPlanObject = CwPlatform.ResolveNotNull<IHierarchyObjectsMapper>().BuildMap(null, hierarchy.NestedContoursByContour);
+        var nets = new TbNetBuilder(net, contourByPlanObject.Value!, CwPlatform.ResolveNotNull<IWaterSystemService>(), checks, standPipes).BuildNets();
         var lines = new List<string> { $"Проверка: сетей {nets.Count}, приборов в проекте {consumers}." };
         foreach (var item in nets)
         {
