@@ -7,6 +7,7 @@ using Nanosoft.Acad.Interop.NativeComponent;
 using Nanosoft.Acad.Net;
 using Nanosoft.CAE.Module.BuildingModel.AreaHierarchy.Processors.Builder;
 using Nanosoft.CAE.Module.BuildingModel.AreaHierarchy.Processors.PlanObjects;
+using Nanosoft.Collections.WriteProtected.Constant.Set;
 using Nanosoft.Piping.Common.Base;
 using Nanosoft.Piping.Common.Ifaces;
 using Nanosoft.Piping.Common.Pipes;
@@ -141,7 +142,7 @@ public sealed class WaterSupplyDemoGenerator : IProductDemoGenerator
         net.Load(false);
         var consumers = net.Nodes.OfType<ConsumerBase>().Count();
         var hierarchy = CwPlatform.ResolveNotNull<IAreaHierarchyBuilder>().Build(net, new List<OperationOutputEntry>());
-        var contourByPlanObject = CwPlatform.ResolveNotNull<IHierarchyObjectsMapper>().BuildMap(null, hierarchy.NestedContoursByContour);
+        var contourByPlanObject = CwPlatform.ResolveNotNull<IHierarchyObjectsMapper>().BuildMap(hierarchy.NestedContoursByContour.Keys.ToConstantSet(), hierarchy.NestedContoursByContour);
         var nets = new TbNetBuilder(net, contourByPlanObject.Value!, CwPlatform.ResolveNotNull<IWaterSystemService>(), checks, standPipes).BuildNets();
         var lines = new List<string> { $"Проверка: сетей {nets.Count}, приборов в проекте {consumers}." };
         foreach (var item in nets)
