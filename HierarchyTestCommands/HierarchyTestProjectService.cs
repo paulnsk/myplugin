@@ -27,14 +27,21 @@ public sealed class HierarchyTestProjectService
 
     internal IAcadNet? Create() => Create(ProjectTypes.Electrica, HierarchyTestConstants.RootDirectory);
 
-    /// <summary>Новый проект указанного типа в новой GUID-папке внутри rootDirectory; null — пользователь не закрыл прежний.</summary>
-    internal IAcadNet? Create(string projectTypeName, string rootDirectory)
+    /// <summary>Новый проект указанного типа в новой папке внутри rootDirectory (имя — projectName или GUID); null — пользователь не закрыл прежний.</summary>
+    internal IAcadNet? Create(string projectTypeName, string rootDirectory, string? projectName = null)
     {
         ThrowIf.Argument.IsNull(projectTypeName, nameof(projectTypeName));
         ThrowIf.Argument.IsNull(rootDirectory, nameof(rootDirectory));
         var studio = global::Nanosoft.Studio.Studio.Instance;
         var workspace = studio.Workspace;
         ThrowIf.Variable.IsNull(workspace, nameof(workspace));
+        projectName ??= Guid.NewGuid().ToString();
+        var directoryPath = Path.Combine(rootDirectory, projectName);
+        if (Directory.Exists(directoryPath))
+        {
+            throw new InvalidOperationException($"Папка {directoryPath} уже есть: удалите её и повторите команду.");
+        }
+
         if (workspace.IsOpened)
         {
             workspace.Close();
@@ -46,8 +53,6 @@ public sealed class HierarchyTestProjectService
 
         var projectType = studio.PrjTypes.FirstOrDefault(x => x.Name == projectTypeName)
             ?? throw new InvalidOperationException($"Тип проекта {projectTypeName} не найден.");
-        var projectName = Guid.NewGuid().ToString();
-        var directoryPath = Path.Combine(rootDirectory, projectName);
         Directory.CreateDirectory(directoryPath);
         var projectPath = Path.Combine(directoryPath, projectName + ".csp");
         workspace.AddNew(projectType, projectPath);

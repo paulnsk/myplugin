@@ -55,6 +55,9 @@ public class PluginCommands
     [CommandMethod("CW_HIERARCHY_TEST_GENERATE_PSA12661_NO_FLOORS", CommandFlags.Session)]
     public void GeneratePsa12661NoFloors() => Run(() => ProductModules.GenerateDemo("PSA12661_NO_FLOORS"));
 
+    [CommandMethod("CW_HIERARCHY_TEST_GENERATE_PSA12816_AUTOTEST", CommandFlags.Session)]
+    public void GeneratePsa12816AutoTest() => Run(() => ProductModules.GenerateDemo("PSA12816_AUTOTEST"));
+
     [CommandMethod("CW_HIERARCHY_TEST_GENERATE3D", CommandFlags.Session)]
     public void Generate3D() => Run(() => Tests.Value.Export(false));
 

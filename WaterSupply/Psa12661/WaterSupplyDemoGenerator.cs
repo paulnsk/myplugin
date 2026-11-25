@@ -28,6 +28,9 @@ namespace MyPlugin.WaterSupply.Psa12661;
 public sealed class WaterSupplyDemoGenerator : IProductDemoGenerator
 {
     internal const string RootDirectory = @"C:\test\WsPsa12661";
+    private const string Psa12816AutoTest = "PSA12816_AUTOTEST";
+    // Имя папки и проекта — как у соседних автотестов в UnitTestBox\AutoTestSamples\WaterSupply.
+    private const string Psa12816AutoTestProjectName = "PSA-12816 Вводы вне этажей";
 
     public bool Generate(string demoId)
     {
@@ -37,6 +40,7 @@ public sealed class WaterSupplyDemoGenerator : IProductDemoGenerator
             "PSA12816_ERROR_LOOP" => x => x.ErrorLoop(),
             "PSA12661_BOILER" => x => x.Boiler(),
             "PSA12661_NO_FLOORS" => x => x.NoFloors(),
+            Psa12816AutoTest => x => x.Boiler(),
             _ => null
         };
         if (build == null)
@@ -69,7 +73,7 @@ public sealed class WaterSupplyDemoGenerator : IProductDemoGenerator
         IAcadNet? net;
         using (var closer = new WaterSupplySettingsWindowCloser())
         {
-            net = projects.Create(ProjectTypes.WaterSupply, RootDirectory);
+            net = projects.Create(ProjectTypes.WaterSupply, RootDirectory, demoId == Psa12816AutoTest ? Psa12816AutoTestProjectName : null);
             if (closer.Closed)
             {
                 log($"{demoId}: окно настроек, которое ВК всегда показывает при создании проекта, закрыто автоматически.");
